@@ -150,6 +150,29 @@ module Lda
     end
 
     #
+    # Compute the average probability for each topic for each document in the corpus.
+    # This method returns a matrix:  num_docs x num_topics with the average probability
+    # for the topic in the document.
+    #
+    def compute_topic_document_probability_no_log
+      outp = Array.new
+
+      @corpus.documents.each_with_index do |doc, idx|
+        tops = [0.0] * self.num_topics
+        ttl  = doc.counts.inject(0.0) {|sum, i| sum + i}
+        self.phi[idx].each_with_index do |word_dist, word_idx|
+          word_dist.each_with_index do |top_prob, top_idx|
+            tops[top_idx] += top_prob * doc.counts[word_idx]
+          end
+        end
+        tops = tops.map {|i| i / ttl}
+        outp << tops
+      end
+
+      outp
+    end
+
+    #
     # String representation displaying current settings.
     #
     def to_s
